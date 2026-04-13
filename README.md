@@ -178,3 +178,13 @@ waysnap/
     ├── main.rs       — CLI (install / show-config / reload)
     └── labwc_ipc.rs  — rc.xml patching logic + SIGHUP
 ```
+
+---
+
+## About
+
+This project was entirely written by **Claude Sonnet 4.6** via
+**[OpenCode](https://opencode.ai)**, an AI-powered coding agent for the
+terminal. From architecture decisions to edge-case handling and unit tests,
+every line of Rust was generated through a conversational session — no manual
+coding involved.
