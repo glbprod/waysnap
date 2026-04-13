@@ -188,3 +188,6 @@ This project was entirely written by **Claude Sonnet 4.6** via
 terminal. From architecture decisions to edge-case handling and unit tests,
 every line of Rust was generated through a conversational session — no manual
 coding involved.
+
+**Lead developer:** glbprod — architecture, requirements & prompt engineering
+**Code generation:** Claude Sonnet 4.6 via OpenCode
