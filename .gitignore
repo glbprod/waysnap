@@ -1,0 +1,14 @@
+# Rust build artifacts
+/target/
+Cargo.lock
+
+# Backup files created by waysnap itself
+*.waysnap.bak
+*.bak
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store

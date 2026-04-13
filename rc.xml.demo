@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<!--
+  rc.xml — Configuration labwc de démonstration pour waysnap
+  Testé avec labwc 0.9.2 sur Raspberry Pi (Raspbian, Wayland)
+
+  Ce fichier illustre une configuration complète intégrant les keybindings
+  waysnap (SnapToEdge) ainsi que les options les plus utiles pour un usage
+  desktop courant.
+
+  Installer avec : waysnap install
+  Ou copier ce fichier dans ~/.config/labwc/rc.xml
+-->
+<labwc_config>
+
+  <!-- ================================================================
+       CORE
+       ================================================================ -->
+  <core>
+    <!-- Décorations serveur (titrebarre gérée par labwc) -->
+    <decoration>server</decoration>
+    <!-- Espace entre fenêtres et bords de l'écran lors des déplacements -->
+    <gap>4</gap>
+    <!-- Adaptive sync (économise l'énergie sur Pi) -->
+    <adaptiveSync>yes</adaptiveSync>
+  </core>
+
+  <!-- ================================================================
+       PLACEMENT DES NOUVELLES FENÊTRES
+       ================================================================ -->
+  <placement>
+    <policy>cascade</policy>
+  </placement>
+
+  <!-- ================================================================
+       FOCUS
+       ================================================================ -->
+  <focus>
+    <followMouse>no</followMouse>
+    <raiseOnFocus>no</raiseOnFocus>
+  </focus>
+
+  <!-- ================================================================
+       WINDOW SNAPPING (natif labwc)
+       inner/outer : distance en pixels du bord pour déclencher le snap
+       cornerRange : distance du coin pour snap en quart
+       ================================================================ -->
+  <snapping>
+    <range>
+      <inner>10</inner>
+      <outer>10</outer>
+    </range>
+    <cornerRange>50</cornerRange>
+    <overlay>
+      <enabled>yes</enabled>
+      <delay>
+        <inner>300</inner>
+        <outer>300</outer>
+      </delay>
+    </overlay>
+    <!-- Snap vers le haut = maximiser -->
+    <topMaximize>yes</topMaximize>
+  </snapping>
+
+  <!-- ================================================================
+       THÈME
+       ================================================================ -->
+  <theme>
+    <name>Clearlooks</name>
+    <cornerRadius>4</cornerRadius>
+  </theme>
+
+  <!-- ================================================================
+       CLAVIER — raccourcis par défaut labwc
+       ================================================================ -->
+  <keyboard>
+    <default/>
+
+    <!-- Lancer un terminal -->
+    <keybind key="W-Return">
+      <action name="Execute" command="lxterminal"/>
+    </keybind>
+
+    <!-- Fermer la fenêtre active -->
+    <keybind key="A-F4">
+      <action name="Close"/>
+    </keybind>
+
+    <!-- Basculer le menu root -->
+    <keybind key="W-d">
+      <action name="ShowMenu" menu="root-menu"/>
+    </keybind>
+
+    <!-- Naviguer entre les fenêtres -->
+    <keybind key="A-Tab">
+      <action name="NextWindow"/>
+    </keybind>
+    <keybind key="A-S-Tab">
+      <action name="PreviousWindow"/>
+    </keybind>
+
+    <!-- Iconifier -->
+    <keybind key="W-h">
+      <action name="Iconify"/>
+    </keybind>
+  </keyboard>
+
+  <!-- ================================================================
+       waysnap: window snapping keybindings (modifier=W)
+       Généré par : waysnap install
+       Modifier manuellement ou relancer waysnap install pour mettre à jour.
+       ================================================================ -->
+  <!-- waysnap: window snapping keybindings (modifier=W) -->
+  <keyboard>
+    <!-- Half-screen snapping -->
+    <keybind key="W-Left">
+      <action name="SnapToEdge" direction="left"/>
+    </keybind>
+    <keybind key="W-Right">
+      <action name="SnapToEdge" direction="right"/>
+    </keybind>
+    <keybind key="W-Up">
+      <action name="SnapToEdge" direction="up"/>
+    </keybind>
+    <keybind key="W-Down">
+      <action name="SnapToEdge" direction="down"/>
+    </keybind>
+
+    <!-- Fullscreen toggle -->
+    <keybind key="W-f">
+      <action name="ToggleMaximize"/>
+    </keybind>
+
+    <!-- Quarter snapping via pavé numérique -->
+    <keybind key="W-KP_7">
+      <action name="SnapToEdge" direction="up-left"/>
+    </keybind>
+    <keybind key="W-KP_9">
+      <action name="SnapToEdge" direction="up-right"/>
+    </keybind>
+    <keybind key="W-KP_1">
+      <action name="SnapToEdge" direction="down-left"/>
+    </keybind>
+    <keybind key="W-KP_3">
+      <action name="SnapToEdge" direction="down-right"/>
+    </keybind>
+  </keyboard>
+  <!-- end waysnap -->
+
+  <!-- ================================================================
+       SOURIS
+       ================================================================ -->
+  <mouse>
+    <default/>
+    <doubleClickTime>400</doubleClickTime>
+  </mouse>
+
+  <!-- ================================================================
+       LIBINPUT (touchpad sur Pi avec clavier/souris USB)
+       ================================================================ -->
+  <libinput>
+    <device category="touchpad">
+      <tap>yes</tap>
+      <naturalScroll>yes</naturalScroll>
+      <disableWhileTyping>yes</disableWhileTyping>
+    </device>
+  </libinput>
+
+</labwc_config>
