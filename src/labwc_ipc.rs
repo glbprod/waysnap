@@ -19,7 +19,7 @@ use std::path::PathBuf;
 ///
 /// Zones supportées (même comportement que le snap Ubuntu) :
 ///   - Moitié gauche/droite/haut/bas : left, right, up, down
-///   - Plein écran : Maximize (toggle)
+///   - Maximisation : ToggleMaximize
 ///   - Quarts : up-left, up-right, down-left, down-right
 ///
 /// Le modificateur est typiquement "W" (Super/Logo).
@@ -42,7 +42,7 @@ pub fn keybind_snippet(modifier: &str) -> String {
       <action name="SnapToEdge" direction="down"/>
     </keybind>
 
-    <!-- Fullscreen toggle -->
+    <!-- Maximize toggle -->
     <keybind key="{m}-f">
       <action name="ToggleMaximize"/>
     </keybind>
@@ -112,9 +112,12 @@ pub fn install_snippet(snippet: &str) -> io::Result<PathBuf> {
         insert_before_closing_tag(&original, snippet)
     };
 
-    // Sauvegarde avant écrasement
+    // Sauvegarde avant écrasement — uniquement la première fois, pour
+    // conserver le rc.xml d'origine (avant toute intervention de waysnap).
     let backup = path.with_extension("xml.waysnap.bak");
-    fs::copy(&path, &backup)?;
+    if !backup.exists() {
+        fs::copy(&path, &backup)?;
+    }
 
     fs::write(&path, patched)?;
     Ok(path)
@@ -123,19 +126,27 @@ pub fn install_snippet(snippet: &str) -> io::Result<PathBuf> {
 /// Remplace le bloc existant waysnap (entre `<!-- waysnap:` et `<!-- end waysnap -->`).
 fn replace_waysnap_block(content: &str, snippet: &str) -> String {
     let start_marker = "<!-- waysnap:";
-    let end_marker = "  <!-- end waysnap -->";
+    let end_marker = "<!-- end waysnap -->";
 
-    let start = content.find(start_marker);
-    let end = content.find(end_marker).map(|i| i + end_marker.len());
+    // Le bloc commence au début de la ligne du marqueur (le snippet porte
+    // déjà sa propre indentation) : sinon l'indentation s'accumule.
+    let start = content
+        .find(start_marker)
+        .map(|i| content[..i].rfind('\n').map_or(0, |nl| nl + 1));
+    // Le bloc se termine à la fin de la ligne du marqueur de fin (newline inclus).
+    let end = start.and_then(|s| {
+        content[s..].find(end_marker).map(|rel| {
+            let after = s + rel + end_marker.len();
+            content[after..].find('\n').map_or(content.len(), |nl| after + nl + 1)
+        })
+    });
 
     match (start, end) {
         (Some(s), Some(e)) => {
             let mut out = String::with_capacity(content.len());
             out.push_str(&content[..s]);
             out.push_str(snippet);
-            // Skip trailing newline after end_marker if present
-            let rest = &content[e..];
-            out.push_str(rest.trim_start_matches('\n'));
+            out.push_str(&content[e..]);
             out
         }
         _ => insert_before_closing_tag(content, snippet),
@@ -357,6 +368,43 @@ mod tests {
         let result = replace_waysnap_block(xml, new_snippet);
         assert!(result.contains("new"));
         assert!(!result.contains("old"));
+    }
+
+    #[test]
+    fn replace_is_idempotent_without_indent_drift() {
+        let base = "<labwc_config>\n  <keyboard/>\n</labwc_config>\n";
+        let snippet = keybind_snippet("W");
+        let once = insert_before_closing_tag(base, &snippet);
+        let twice = replace_waysnap_block(&once, &snippet);
+        let thrice = replace_waysnap_block(&twice, &snippet);
+        assert_eq!(once, twice);
+        assert_eq!(twice, thrice);
+        assert_eq!(thrice.matches("<!-- waysnap:").count(), 1);
+    }
+
+    #[test]
+    fn replace_handles_unusual_end_marker_indent() {
+        let xml = "<labwc_config>\n<!-- waysnap: old -->\n<keyboard/>\n\t<!-- end waysnap -->\n</labwc_config>\n";
+        let new_snippet = "  <!-- waysnap: new -->\n  <!-- end waysnap -->\n";
+        let result = replace_waysnap_block(xml, new_snippet);
+        assert_eq!(result, "<labwc_config>\n  <!-- waysnap: new -->\n  <!-- end waysnap -->\n</labwc_config>\n");
+    }
+
+    #[test]
+    fn backup_keeps_original_across_runs() {
+        let dir = env::temp_dir().join(format!("waysnap-test-{}", std::process::id()));
+        let labwc = dir.join("labwc");
+        fs::create_dir_all(&labwc).unwrap();
+        let original = "<?xml version=\"1.0\"?>\n<labwc_config>\n</labwc_config>\n";
+        fs::write(labwc.join("rc.xml"), original).unwrap();
+        env::set_var("XDG_CONFIG_HOME", &dir);
+
+        install_snippet(&keybind_snippet("W")).unwrap();
+        install_snippet(&keybind_snippet("A")).unwrap();
+
+        let bak = fs::read_to_string(labwc.join("rc.xml.waysnap.bak")).unwrap();
+        assert_eq!(bak, original);
+        fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

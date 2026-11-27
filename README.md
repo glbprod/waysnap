@@ -38,7 +38,7 @@ waysnap install
 | `Super + Right` | Snap to right half |
 | `Super + Up` | Snap to top half |
 | `Super + Down` | Snap to bottom half |
-| `Super + F` | Toggle fullscreen (maximize) |
+| `Super + F` | Toggle maximize |
 | `Super + KP_7` | Snap to top-left quarter |
 | `Super + KP_9` | Snap to top-right quarter |
 | `Super + KP_1` | Snap to bottom-left quarter |
@@ -65,7 +65,9 @@ the output where the active window currently resides.
 Both `<labwc_config>` (native labwc format) and `<openbox_config>` (OpenBox
 compatibility format) are supported as root elements.
 
-A backup is always written to `rc.xml.waysnap.bak` before any modification.
+A backup of the original file is written to `rc.xml.waysnap.bak` on the first
+modification. It is never overwritten afterwards, so it always holds your
+pre-waysnap `rc.xml`.
 
 ---
 
@@ -88,7 +90,7 @@ A backup is always written to `rc.xml.waysnap.bak` before any modification.
     <action name="SnapToEdge" direction="down"/>
   </keybind>
 
-  <!-- Fullscreen toggle -->
+  <!-- Maximize toggle -->
   <keybind key="W-f">
     <action name="ToggleMaximize"/>
   </keybind>
